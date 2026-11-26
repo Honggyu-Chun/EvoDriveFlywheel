@@ -40,6 +40,7 @@ flowchart TD
 
 - [Expert Recovery](Expert/README.md) — GT 기반 교사 주행, MPC 복구, 단독 데이터 수집 검증
 - [DAgger](DAgger/README.md) — 모델과 교사 사이의 제어권 전환, 복구 라벨, 재학습 연결
+- [Scenario Randomizer v0.5.0](Scenario_randomizer/README.md) — 고정 코스의 장애물·교통 랜덤 배치와 실제 MORAI 수집 결과
 
 ## Baseline resources
 
