@@ -36,6 +36,11 @@ flowchart TD
 
 시뮬레이션 PC는 MORAI 실행·데이터 취득·주행 평가 및 추론을 담당하는 것을 목표로 하며, 학습 서버는 데이터 처리 및 모델 업데이트를 담당한다. 상세 배치와 전송 방식은 미정이다. 모델/데이터/평가 이력과 실험 조건을 추적한다. 학습 풀, 개선 피드백 세트, 검증 세트 및 최종 테스트 세트를 분리한다. 모델 실패 궤적을 그대로 전문가 정답으로 사용하지 않으며 별도의 유효한 supervision을 확보한다.
 
+## 기존 `molit_e2e` 구현 참고
+
+- [Expert Recovery](Expert/README.md) — GT 기반 교사 주행, MPC 복구, 단독 데이터 수집 검증
+- [DAgger](DAgger/README.md) — 모델과 교사 사이의 제어권 전환, 복구 라벨, 재학습 연결
+
 ## Baseline resources
 
 - [LEAD paper (CVPR 2026)](https://openaccess.thecvf.com/content/CVPR2026/html/Nguyen_LEAD_Minimizing_Learner-Expert_Asymmetry_in_End-to-End_Driving_CVPR_2026_paper.html)
