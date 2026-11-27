@@ -1,2 +1,5 @@
 /TFv6/.venv/
 /TFv6/lead/
+/TFv6/checkpoints/
+/TFv6/phase2-local/
+/TFv6/tools/__pycache__/

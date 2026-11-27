@@ -14,13 +14,13 @@ Camera-only E2E 주행 모델을 MORAI에서 실행하고, 주행 실패를 분�
 | 데이터 프레임워크 | py123d / Apache Arrow |
 | 인지 입력 | Camera-only (LiDAR/Radar 미사용); Ego state 및 navigation 활용 |
 | 시뮬레이터 | MORAI 학교 전용 버전 |
-| 시뮬레이션/취득 PC | Ubuntu 20.04.6 LTS, i7-13700 (16C/24T), RAM 약 32GB, RTX 4080 SUPER 16GB, NVIDIA driver 560.35.03 (reported CUDA support 12.6; toolkit 미확인) |
+| 시뮬레이션/취득 PC | Ubuntu 20.04.6 LTS, i7-13700 (16C/24T), RAM 약 32GB, RTX 4080 SUPER 16GB, NVIDIA driver 560.35.03 (`nvidia-smi` CUDA 12.6, 시스템 Toolkit 11.1/11.8, PyTorch Runtime 12.8) |
 | 학습 서버 | RTX A5000 24GB × 3, 공개 체크포인트 기반 반복 fine-tuning |
 | 실시간 요구 | MORAI 동시 실행 중 최신 센서 관측 기반 새 planning 결과 10Hz 이상, end-to-end latency 100ms 이내 목표 |
 | 검증 | mean/p95/p99 latency, deadline miss rate, VRAM, 재학습 가능 여부 |
 | 장기 모델 | Camera-only lightweight VLA; 초기 TFv6 자체는 VLA가 아님 |
 
-학습 가능 여부, MORAI 이식 및 10Hz는 실측 전이며 달성된 성능이 아니다. 카메라 수·배치·FOV·해상도, 좌표계, 추론 인터페이스는 체크포인트와 upstream 소스 분석 후 확정한다. 내부 접속 주소 및 비공개 데이터는 공개 저장소에 기록하지 않는다.
+Phase 2에서 공식 체크포인트의 카메라 rig, 좌표계와 입출력 계약을 확인했다. MORAI 이식과 10 Hz 폐루프, 학습 서버 실측은 후속 단계다. 내부 접속 주소 및 비공개 데이터는 공개 저장소에 기록하지 않는다. [TFv6 입력·출력 계약](docs/03_MODEL_INPUT_OUTPUT.md)
 
 ## Data Flywheel
 
@@ -53,7 +53,7 @@ flowchart TD
 - [LEAD branch analysis](LEAD_BRANCH_COMPARISON.md)
 - [TFv6 개발 환경](TFv6/README.md) — 고정 LEAD 소스, 전용 Python 환경 및 시뮬레이션 PC 검증 기록
 
-EvoDriveFlywheel은 LEAD `main`의 v1.5.1 릴리스 커밋을 기준으로 한다. 해당 Vision-only 체크포인트의 seed 선정과 로딩 검증은 다음 단계다. CARLA 성능을 MORAI에서의 성능으로 간주하지 않는다.
+EvoDriveFlywheel의 초기 재현 기준은 LEAD `main` v1.5.1의 Vision-only ResNet34 **seed 0**, planning 후속 학습 `model_0030.pth`다. [Phase 2 기술 문서](docs/README.md) · [공식 체크포인트와 검증 재현 명령](docs/07_INFERENCE_VERIFICATION.md)
 
 ## 단계별 개발 계획
 
@@ -89,4 +89,4 @@ ScaleDrive, BridgeDrive, DRIFT, SimLingo는 후속 연구 참고 후보이며 �
 
 ## Current status
 
-Phase 1 개발 환경을 시뮬레이션 PC에 구축했다. LEAD v1.5.1과 py123d를 고정했으며, 주요 모듈 import, 의존성 검사 및 RTX 4080 SUPER의 기본 CUDA 연산을 통과했다. 다음 단계는 Vision-only ResNet34 체크포인트 확보와 모델 구조 분석이다. EvoDriveFlywheel의 MORAI 연동, 데이터 취득, 학습 성능 및 10 Hz 주행은 미검증이다. [Phase 1 환경 구성과 검증 기록](TFv6/README.md)
+**Phase 2 완료.** 64,044,368개 파라미터의 공식 seed 0 모델이 엄격한 가중치 로딩 및 공개 CARLA 연속 세 관측 추론을 통과했다. RTX 4080 SUPER에서 공식 BF16 설정의 p99는 모델 단독 14.36 ms, 20개 관측의 offline pipeline 23.31 ms였다. 다음은 MORAI 카메라·navigation·제어 연동 및 전체 10 Hz 측정이다. [환경과 검증 명령](TFv6/README.md) · [벤치마크](docs/08_INFERENCE_BENCHMARK.md) · [MORAI 연동 요구사항](docs/09_MORAI_INTEGRATION_REQUIREMENTS.md)

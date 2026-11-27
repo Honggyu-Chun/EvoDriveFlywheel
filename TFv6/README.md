@@ -1,6 +1,6 @@
-# TFv6 · Phase 1 개발 환경
+# TFv6 · LEAD 환경 및 베이스라인
 
-`TFv6/`는 EvoDriveFlywheel의 camera-only TransFuser v6 Vision-only ResNet34를 개발할 LEAD 환경이다. `lead/`에 공식 소스를 두고, `.venv/`에 이 프로젝트 전용 Python과 의존성을 설치한다. 이 단계의 검증 범위는 패키지 설치, 주요 모듈 import, 대상 GPU의 기본 CUDA 연산이다.
+`TFv6/`는 EvoDriveFlywheel의 camera-only TransFuser v6 Vision-only ResNet34를 개발할 LEAD 환경이다. `lead/`에 공식 소스를 두고, `.venv/`에 이 프로젝트 전용 Python과 의존성을 설치한다. Phase 1의 패키지·CUDA 확인 결과와 Phase 2 독립 추론의 재현 방법을 기록한다.
 
 ## Upstream
 
@@ -14,7 +14,7 @@
 | LEAD 패키지 | `1.5.1`, MIT 라이선스 |
 | py123d | `0.7.0`, Git 커밋 `4d20a6cfd50f7966647448084f6482c0b65effff` |
 
-클론 시점에 `origin/main`과 `v.1.5.1` 태그가 동일한 커밋을 가리켰다. Vision-only ResNet34 체크포인트의 릴리스 계열에 맞춰 이 커밋을 선택했다. 체크포인트 바이너리와의 strict-load 호환성은 다음 단계에서 확인한다. [LEAD 공식 릴리스](https://github.com/kesai-labs/lead/releases/tag/v.1.5.1) · [Vision-only 모델 공개 페이지](https://huggingface.co/ln2697/transfuser-carla-123d/tree/main/visiononly_resnet34_v1.5.1)
+클론 시점에 `origin/main`과 `v.1.5.1` 태그가 동일한 커밋을 가리켰다. Vision-only ResNet34 체크포인트의 릴리스 계열에 맞춰 이 커밋을 선택했다. Phase 2에서 공식 Vision-only seed 0 체크포인트의 strict-load 호환성을 확인했다. [LEAD 공식 릴리스](https://github.com/kesai-labs/lead/releases/tag/v.1.5.1) · [Vision-only 모델 공개 페이지](https://huggingface.co/ln2697/transfuser-carla-123d/tree/main/visiononly_resnet34_v1.5.1)
 
 ## 시스템 조사
 
@@ -102,8 +102,18 @@ Upstream 설치 과정에서 로컬 `lead/.env`와 패키지 메타데이터가 
 
 드라이버 `560.35.03`에서 공식 cu128 wheel이 위 CUDA 연산을 수행했다. `nvidia-smi`의 12.6은 드라이버가 표시하는 버전이고, PyTorch Runtime은 wheel 의존성으로 설치된 12.8이다. CUDA minor-version compatibility에서 PTX와 드라이버가 더 필요한 기능에는 제한이 있으므로 `torch.compile`과 CUDA 확장 빌드는 `NOT TESTED`로 남긴다. [NVIDIA CUDA Minor Version Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/latest/minor-version-compatibility.html)
 
-체크포인트 로딩·모델 forward, MORAI 실행, 학습 서버 및 실제 학습 성능은 이번 환경 검증 범위 밖이다.
+## Phase 2 독립 추론
 
-## 다음 단계
+공식 Vision-only ResNet34 v1.5.1 seed 0의 `model_0030.pth`를 기본값으로 고정했다. Strict load 771개 key, synthetic forward, 공식 Town01 CARLA 로그 연속 3개 관측과 같은 anchor의 공식 라벨·loss 계산을 통과했다. RTX 4080 SUPER의 공식 BF16 설정에서 모델 단독 p99는 14.36 ms, 20개 관측의 offline pipeline p99는 23.31 ms였다. [모델과 데이터 기술 문서](../docs/README.md) · [벤치마크](../docs/08_INFERENCE_BENCHMARK.md)
 
-TFv6 Vision-only ResNet34 체크포인트 확보 및 모델 구조 분석.
+저장소 루트에서 다음 명령을 실행한다. 호스트의 네이티브 TurboJPEG 호환성, `PY123D_DATA_ROOT`와 검증 그림 옵션은 상세 재현 절차에서 확인한다. [검증 및 환경별 재현 절차](../docs/07_INFERENCE_VERIFICATION.md)
+
+```bash
+unset LEAD_CONFIG
+HF_HUB_DISABLE_XET=1 TFv6/.venv/bin/python -Bu TFv6/tools/fetch_baseline.py
+export PY123D_DATA_ROOT="$PWD/TFv6/phase2-local/data"
+TFv6/.venv/bin/python -Bu TFv6/tools/verify_baseline.py
+TFv6/.venv/bin/python -Bu TFv6/tools/benchmark_baseline.py
+```
+
+체크포인트, 원본 로그, 측정 JSON은 Git에서 제외한 `TFv6/checkpoints/`, `TFv6/phase2-local/`에 저장된다. 다음 단계 요구사항은 [MORAI 연동](../docs/09_MORAI_INTEGRATION_REQUIREMENTS.md)에 기록했다. MORAI 폐루프 10 Hz와 A5000 학습은 이 단계에서 미검증이다.
