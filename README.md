@@ -10,6 +10,8 @@ Camera-only E2E 주행 모델을 MORAI에서 실행하고, 주행 실패를 분�
 | 항목 | 결정 |
 |---|---|
 | 초기 모델 | TransFuser v6, Vision-only ResNet34 |
+| LEAD 기준 소스 | `main` 계열, v1.5.1 릴리스 |
+| 데이터 프레임워크 | py123d / Apache Arrow |
 | 인지 입력 | Camera-only (LiDAR/Radar 미사용); Ego state 및 navigation 활용 |
 | 시뮬레이터 | MORAI 학교 전용 버전 |
 | 시뮬레이션/취득 PC | Ubuntu 20.04.6 LTS, i7-13700 (16C/24T), RAM 약 32GB, RTX 4080 SUPER 16GB, NVIDIA driver 560.35.03 (reported CUDA support 12.6; toolkit 미확인) |
@@ -49,8 +51,9 @@ flowchart TD
 - [cvpr2026 Vision-only checkpoint](https://huggingface.co/ln2697/tfv6/tree/main/visiononly_resnet34) — reported Bench2Drive DS 91.60
 - [main-compatible v1.5.1 Vision-only checkpoint](https://huggingface.co/ln2697/transfuser-carla-123d/tree/main/visiononly_resnet34_v1.5.1) — reported DS 87.6 ± 1.2
 - [LEAD branch analysis](LEAD_BRANCH_COMPARISON.md)
+- [TFv6 개발 환경](TFv6/README.md) — 고정 LEAD 소스, 전용 Python 환경 및 시뮬레이션 PC 검증 기록
 
-두 upstream 브랜치는 데이터 및 체크포인트가 호환되지 않는다. upstream 브랜치, 정확한 commit 및 checkpoint seed는 아직 선정하지 않았다. CARLA 성능을 MORAI에서의 성능으로 간주하지 않는다.
+EvoDriveFlywheel은 LEAD `main`의 v1.5.1 릴리스 커밋을 기준으로 한다. 해당 Vision-only 체크포인트의 seed 선정과 로딩 검증은 다음 단계다. CARLA 성능을 MORAI에서의 성능으로 간주하지 않는다.
 
 ## 단계별 개발 계획
 
@@ -86,4 +89,4 @@ ScaleDrive, BridgeDrive, DRIFT, SimLingo는 후속 연구 참고 후보이며 �
 
 ## Current status
 
-프로젝트 정의 및 초기 모델 계열 선정 완료. 실제 실행, 데이터 취득, 학습, 실시간 주행, 연구 방법론은 아직 검증되지 않았다. 구현 착수 전 LEAD 브랜치 및 체크포인트 선정이 필요하다.
+Phase 1 개발 환경을 시뮬레이션 PC에 구축했다. LEAD v1.5.1과 py123d를 고정했으며, 주요 모듈 import, 의존성 검사 및 RTX 4080 SUPER의 기본 CUDA 연산을 통과했다. 다음 단계는 Vision-only ResNet34 체크포인트 확보와 모델 구조 분석이다. EvoDriveFlywheel의 MORAI 연동, 데이터 취득, 학습 성능 및 10 Hz 주행은 미검증이다. [Phase 1 환경 구성과 검증 기록](TFv6/README.md)
